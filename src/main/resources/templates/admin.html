@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Admin Page</h2>
+
+<h3>All Users</h3>
+<div th:each="user : ${users}">
+    <p>
+        <span th:text="${user.id}"></span> -
+        <span th:text="${user.username}"></span> -
+        <span th:text="${user.role}"></span>
+    </p>
+</div>
+
+<hr>
+
+<h3>All Comments</h3>
+<div th:each="comment : ${comments}">
+    <p>
+        <span th:text="${comment.id}"></span> -
+        <strong th:text="${comment.username}"></strong>:
+        <span th:text="${comment.content}"></span>
+    </p>
+</div>
+
+</body>
+</html>

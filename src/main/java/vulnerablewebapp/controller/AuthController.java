@@ -40,8 +40,7 @@ public class AuthController {
         User user = userRepository.findByUsername(username);
 
         if (user != null && user.getPassword().equals(password)) {
-            model.addAttribute("username", username);
-            return "home";
+            return "redirect:/home";
         }
 
         model.addAttribute("error", "Invalid username or password");
