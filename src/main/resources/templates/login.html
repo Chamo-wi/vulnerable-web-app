@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h2>Login Page</h2>
+    <h2>Login Page</h2>
 
-<p th:text="${error}"></p>
+    <form action="/login" method="post">
+        <input type="text" name="username" placeholder="Username"><br><br>
+        <input type="password" name="password" placeholder="Password"><br><br>
+        <button type="submit">Login</button>
+    </form>
 
-<form action="/login" method="post">
-    <input type="text" name="username" placeholder="username">
-    <input type="text" name="password" placeholder="password">
-    <button type="submit">Login</button>
-</form>
+    <p th:text="${error}"></p>
 
+    <a href="/register">Go to Register</a>
 </body>
 </html>
