@@ -1,6 +1,7 @@
 package vulnerablewebapp.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,11 +10,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import vulnerablewebapp.model.User;
 import vulnerablewebapp.repository.UserRepository;
 
+import java.util.List;
+import java.util.Map;
+
 @Controller
 public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @GetMapping("/register")
     public String showRegisterPage() {
@@ -37,9 +44,10 @@ public class AuthController {
                             @RequestParam String password,
                             Model model) {
 
-        User user = userRepository.findByUsername(username);
+        String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
+        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql);
 
-        if (user != null && user.getPassword().equals(password)) {
+        if (!result.isEmpty()) {
             return "redirect:/home";
         }
 
