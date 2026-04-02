@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import vulnerablewebapp.model.User;
 import vulnerablewebapp.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
 import java.util.Map;
@@ -42,12 +43,14 @@ public class AuthController {
     @PostMapping("/login")
     public String loginUser(@RequestParam String username,
                             @RequestParam String password,
-                            Model model) {
+                            Model model,
+                            HttpSession session) {
 
         String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
         List<Map<String, Object>> result = jdbcTemplate.queryForList(sql);
 
         if (!result.isEmpty()) {
+            session.setAttribute("user", username);
             return "redirect:/home";
         }
 

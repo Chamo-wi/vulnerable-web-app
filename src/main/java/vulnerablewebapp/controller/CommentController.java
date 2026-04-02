@@ -13,11 +13,11 @@ public class CommentController {
     @Autowired
     private CommentRepository commentRepository;
 
-    @GetMapping("/home")
-    public String showHomePage(Model model) {
-        model.addAttribute("comments", commentRepository.findAll());
-        return "home";
-    }
+    //@GetMapping("/home")
+    //public String showHomePage(Model model) {
+      //  model.addAttribute("comments", commentRepository.findAll());
+        //return "home";
+    //}
 
     @PostMapping("/comment")
     public String addComment(@RequestParam String username,
