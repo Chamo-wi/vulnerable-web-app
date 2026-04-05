@@ -1,14 +1,34 @@
-@PostMapping("/upload")
-public String uploadFile(MultipartFile file) throws IOException {
+package vulnerablewebapp.controller;
 
-    String uploadDir = "uploads/";
-    File dir = new File(uploadDir);
-    if (!dir.exists()) {
-        dir.mkdirs();
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+@Controller
+public class UploadController {
+
+    @GetMapping("/upload")
+    public String uploadPage() {
+        return "upload";
     }
 
-    String filePath = uploadDir + file.getOriginalFilename();
-    file.transferTo(new File(filePath));
+    @PostMapping("/upload")
+    public String uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
 
-    return "redirect:/home";
+        // VULNERABLE: no file type validation
+        String uploadDir = System.getProperty("user.dir") + "/uploads/";
+        Files.createDirectories(Paths.get(uploadDir));
+
+        String filePath = uploadDir + file.getOriginalFilename();
+        file.transferTo(Paths.get(filePath).toAbsolutePath());
+
+        return "redirect:/home";
+    }
 }

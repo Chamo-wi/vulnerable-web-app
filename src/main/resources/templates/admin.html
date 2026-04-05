@@ -1,24 +1,242 @@
 <!DOCTYPE html>
-<html>
-<body>
-    <h2>Admin Page</h2>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>VulnSpring — Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <h3>Users</h3>
-    <div th:each="user : ${users}">
-        <p>
-            <span th:text="${user.username}"></span> -
-            <span th:text="${user.role}"></span>
-        </p>
+        body {
+            background: #0a0e0a;
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            color: #00ff41;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,255,65,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,65,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .topbar {
+            background: #0d110d;
+            border-bottom: 1px solid #ff4141;
+            padding: 12px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .topbar-left {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            color: #ff4141;
+            letter-spacing: 3px;
+        }
+
+        .access-badge {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #ff4141;
+            border: 1px solid #ff4141;
+            padding: 4px 12px;
+            letter-spacing: 2px;
+            background: rgba(255,65,65,0.08);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .topbar-nav a {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #3a5c3a;
+            text-decoration: none;
+            letter-spacing: 2px;
+            padding: 6px 12px;
+            border: 1px solid #1a3a1a;
+            transition: all 0.2s;
+        }
+
+        .topbar-nav a:hover { color: #00ff41; border-color: #00ff41; }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .vuln-banner {
+            background: rgba(255,65,65,0.06);
+            border: 1px solid #ff4141;
+            padding: 12px 20px;
+            margin-bottom: 32px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #ff4141;
+            letter-spacing: 2px;
+        }
+
+        .section-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #3a5c3a;
+            letter-spacing: 3px;
+            margin-bottom: 16px;
+        }
+
+        .card {
+            background: #0d110d;
+            border: 1px solid #1a3a1a;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            color: #ff4141;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #2a1a1a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+        }
+
+        th {
+            text-align: left;
+            color: #3a5c3a;
+            letter-spacing: 2px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #1a3a1a;
+            font-size: 10px;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #0f1f0f;
+            color: #7aad7a;
+        }
+
+        td.highlight { color: #ff4141; }
+
+        tr:hover td { background: #0f1a0f; }
+
+        .role-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        .role-badge.admin {
+            color: #ff4141;
+            border: 1px solid #ff4141;
+            background: rgba(255,65,65,0.05);
+        }
+
+        .role-badge.user {
+            color: #3a5c3a;
+            border: 1px solid #3a5c3a;
+        }
+
+        .comment-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #0f1f0f;
+        }
+
+        .comment-item:last-child { border-bottom: none; }
+
+        .comment-user {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #00ff41;
+            margin-bottom: 4px;
+        }
+
+        .comment-user::before { content: '> '; color: #3a5c3a; }
+
+        .comment-content {
+            font-size: 14px;
+            color: #7aad7a;
+            padding-left: 12px;
+            border-left: 2px solid #1a3a1a;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-left">⚠ ADMIN PANEL — UNRESTRICTED ACCESS</div>
+        <div style="display:flex;align-items:center;gap:16px;">
+            <div class="access-badge">PRIVILEGE ESCALATION ACTIVE</div>
+            <nav class="topbar-nav">
+                <a href="/home">[ HOME ]</a>
+            </nav>
+        </div>
     </div>
 
-    <hr>
+    <div class="container">
+        <div class="vuln-banner">
+            ⚠ VULNERABILITY: No role-based access control — any logged-in user can reach this page
+        </div>
 
-    <h3>Comments</h3>
-    <div th:each="comment : ${comments}">
-        <p>
-            <strong th:text="${comment.username}"></strong>:
-            <span th:utext="${comment.content}"></span>
-        </p>
+        <div class="section-label">// registered users — passwords exposed</div>
+        <div class="card">
+            <div class="card-title">USER DATABASE</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>USERNAME</th>
+                        <th>PASSWORD (PLAINTEXT)</th>
+                        <th>ROLE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}"></td>
+                        <td th:text="${user.username}"></td>
+                        <td class="highlight" th:text="${user.password}"></td>
+                        <td>
+                            <span th:classappend="${user.role == 'ADMIN'} ? 'admin' : 'user'"
+                                  class="role-badge"
+                                  th:text="${user.role}"></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-label">// stored comments — xss payloads render here</div>
+        <div class="card">
+            <div class="card-title">ALL COMMENTS</div>
+            <div th:each="comment : ${comments}" class="comment-item">
+                <div class="comment-user" th:text="${comment.username}"></div>
+                <div class="comment-content" th:text="${comment.content}"></div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

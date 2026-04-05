@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import vulnerablewebapp.model.User;
 import vulnerablewebapp.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,9 @@ public class AuthController {
 
     @PostMapping("/register")
     public String registerUser(@RequestParam String username, @RequestParam String password) {
-        User user = new User(username, password, "USER");
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(password);
+        User user = new User(username, hashedPassword, "USER");
         userRepository.save(user);
         return "redirect:/login";
     }
@@ -46,12 +49,17 @@ public class AuthController {
                             Model model,
                             HttpSession session) {
 
-        String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
-        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql);
+        String sql = "SELECT * FROM users WHERE username = ?";
+        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, username);
 
         if (!result.isEmpty()) {
-            session.setAttribute("user", username);
-            return "redirect:/home";
+            String storedPassword = (String) result.get(0).get("PASSWORD");
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            if (encoder.matches(password, storedPassword)) {
+                session.setAttribute("user", username);
+                session.setAttribute("role", result.get(0).get("ROLE"));
+                return "redirect:/home";
+            }
         }
 
         model.addAttribute("error", "Invalid username or password");

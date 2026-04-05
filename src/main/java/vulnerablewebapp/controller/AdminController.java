@@ -19,8 +19,15 @@ public class AdminController {
 
     @GetMapping("/admin")
     public String showAdminPage(Model model, HttpSession session) {
-        if (session.getAttribute("user") == null) {
+        String user = (String) session.getAttribute("user");
+        String role = (String) session.getAttribute("role");
+
+        if (user == null) {
             return "redirect:/login";
+        }
+
+        if (!"ADMIN".equals(role)) {
+            return "redirect:/home";
         }
 
         model.addAttribute("users", userRepository.findAll());

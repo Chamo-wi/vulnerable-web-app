@@ -1,14 +1,234 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>VulnSpring — Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0a0e0a;
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridScroll 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gridScroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(40px); }
+        }
+
+        .terminal {
+            width: 420px;
+            background: #0d110d;
+            border: 1px solid #00ff41;
+            box-shadow: 0 0 40px rgba(0,255,65,0.15), inset 0 0 40px rgba(0,0,0,0.5);
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .terminal-bar {
+            background: #00ff41;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-bar span {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: #0a0e0a;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #0a0e0a; opacity: 0.4; }
+
+        .terminal-body { padding: 32px; }
+
+        .prompt {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #00ff41;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            opacity: 0.7;
+        }
+
+        h1 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 22px;
+            color: #00ff41;
+            letter-spacing: 4px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #3a5c3a;
+            letter-spacing: 2px;
+            margin-bottom: 32px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .vuln-tag {
+            display: inline-block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #ff4141;
+            border: 1px solid #ff4141;
+            padding: 3px 8px;
+            margin-bottom: 20px;
+            background: rgba(255,65,65,0.05);
+            letter-spacing: 1px;
+        }
+
+        .field { margin-bottom: 20px; }
+
+        label {
+            display: block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #00ff41;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .field-note {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #ff4141;
+            margin-top: 5px;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            background: #060906;
+            border: 1px solid #1a3a1a;
+            border-bottom: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            padding: 10px 12px;
+            outline: none;
+            transition: all 0.2s;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #00ff41;
+            box-shadow: 0 0 12px rgba(0,255,65,0.2);
+            background: #0a120a;
+        }
+
+        input::placeholder { color: #1a3a1a; }
+
+        .btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 4px;
+            padding: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .btn:hover {
+            background: #00ff41;
+            color: #0a0e0a;
+            box-shadow: 0 0 20px rgba(0,255,65,0.4);
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #1a3a1a;
+        }
+
+        .footer-link a {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #3a5c3a;
+            text-decoration: none;
+            letter-spacing: 2px;
+            transition: color 0.2s;
+        }
+
+        .footer-link a:hover { color: #00ff41; }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: #00ff41;
+            margin-left: 4px;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+    </style>
+</head>
 <body>
-    <h2>Register Page</h2>
+    <div class="terminal">
+        <div class="terminal-bar">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <span>VULNSPRING :: NEW USER</span>
+        </div>
+        <div class="terminal-body">
+            <div class="prompt">root@vulnspring:~$</div>
+            <h1>REGISTER<span class="cursor"></span></h1>
+            <div class="subtitle">// CREATE ACCOUNT</div>
+            <div class="vuln-tag">VULN: PLAINTEXT PASSWORD STORAGE</div>
 
-    <form action="/register" method="post">
-        <input type="text" name="username" placeholder="Username"><br><br>
-        <input type="password" name="password" placeholder="Password"><br><br>
-        <button type="submit">Register</button>
-    </form>
+            <form action="/register" method="post">
+                <div class="field">
+                    <label>// USERNAME</label>
+                    <input type="text" name="username" placeholder="choose username" autocomplete="off">
+                </div>
+                <div class="field">
+                    <label>// PASSWORD</label>
+                    <input type="password" name="password" placeholder="choose password">
+                    <div class="field-note">⚠ stored as plaintext — no hashing applied</div>
+                </div>
+                <button class="btn" type="submit">[ CREATE ACCOUNT ]</button>
+            </form>
 
-    <a href="/login">Go to Login</a>
+            <div class="footer-link">
+                <a href="/login">// ALREADY REGISTERED? LOGIN HERE</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

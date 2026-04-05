@@ -1,11 +1,240 @@
 <!DOCTYPE html>
-<html>
-<body>
-    <h2>Upload Page</h2>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>VulnSpring — Upload</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <button type="submit">Upload</button>
-    </form>
+        body {
+            background: #0a0e0a;
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #00ff41;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,255,65,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,65,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .terminal {
+            width: 480px;
+            background: #0d110d;
+            border: 1px solid #00ff41;
+            box-shadow: 0 0 40px rgba(0,255,65,0.15);
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .terminal-bar {
+            background: #00ff41;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-bar span {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: #0a0e0a;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #0a0e0a; opacity: 0.4; }
+
+        .terminal-body { padding: 32px; }
+
+        .prompt {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #00ff41;
+            opacity: 0.7;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 22px;
+            color: #00ff41;
+            letter-spacing: 4px;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: #3a5c3a;
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+        }
+
+        .vuln-banner {
+            background: rgba(255,65,65,0.06);
+            border: 1px solid #ff4141;
+            padding: 10px 16px;
+            margin-bottom: 28px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #ff4141;
+            letter-spacing: 1px;
+            line-height: 1.8;
+        }
+
+        .drop-zone {
+            border: 1px dashed #1a3a1a;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .drop-zone:hover { border-color: #00ff41; background: #0a120a; }
+
+        .drop-icon {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 28px;
+            color: #1a3a1a;
+            margin-bottom: 12px;
+        }
+
+        .drop-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #3a5c3a;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .drop-sub {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #ff4141;
+            letter-spacing: 1px;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        #file-name {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #00ff41;
+            margin-bottom: 20px;
+            min-height: 18px;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 4px;
+            padding: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #00ff41;
+            color: #0a0e0a;
+            box-shadow: 0 0 20px rgba(0,255,65,0.4);
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #1a3a1a;
+        }
+
+        .footer-link a {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #3a5c3a;
+            text-decoration: none;
+            letter-spacing: 2px;
+            transition: color 0.2s;
+        }
+
+        .footer-link a:hover { color: #00ff41; }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="terminal-bar">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <span>VULNSPRING :: FILE UPLOAD</span>
+        </div>
+        <div class="terminal-body">
+            <div class="prompt">root@vulnspring:~$</div>
+            <h1>UPLOAD</h1>
+            <div class="subtitle">// NO VALIDATION — ANY FILE ACCEPTED</div>
+
+            <div class="vuln-banner">
+                ⚠ VULNERABILITY: No file type validation<br>
+                ✗ .jsp web shells accepted<br>
+                ✗ Stored in accessible directory<br>
+                ✗ Can lead to Remote Code Execution (RCE)
+            </div>
+
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <div class="drop-zone">
+                    <div class="drop-icon">[⬆]</div>
+                    <div class="drop-text">CHOOSE FILE TO UPLOAD</div>
+                    <div class="drop-sub">⚠ try uploading shell.jsp</div>
+                    <input type="file" name="file" id="fileInput" onchange="showName(this)">
+                </div>
+                <div id="file-name">// no file selected</div>
+                <button class="btn" type="submit">[ UPLOAD FILE ]</button>
+            </form>
+
+            <div class="footer-link">
+                <a href="/home">// BACK TO HOME</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showName(input) {
+            const label = document.getElementById('file-name');
+            if (input.files && input.files[0]) {
+                label.textContent = '// selected: ' + input.files[0].name;
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,25 +1,248 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>VulnSpring — Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0a0e0a;
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            color: #00ff41;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,255,65,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,65,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .topbar {
+            background: #0d110d;
+            border-bottom: 1px solid #00ff41;
+            padding: 12px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .topbar-left {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            color: #00ff41;
+            letter-spacing: 3px;
+        }
+
+        .topbar-left span { color: #3a5c3a; }
+
+        .topbar-nav { display: flex; gap: 16px; align-items: center; }
+
+        .topbar-nav a {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #3a5c3a;
+            text-decoration: none;
+            letter-spacing: 2px;
+            padding: 6px 12px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .topbar-nav a:hover {
+            color: #00ff41;
+            border-color: #00ff41;
+        }
+
+        .topbar-nav a.danger {
+            color: #ff4141;
+            border-color: #ff4141;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #3a5c3a;
+            letter-spacing: 3px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .card {
+            background: #0d110d;
+            border: 1px solid #1a3a1a;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            color: #00ff41;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #1a3a1a;
+        }
+
+        .vuln-tag {
+            display: inline-block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #ff4141;
+            border: 1px solid #ff4141;
+            padding: 2px 8px;
+            margin-left: 10px;
+            background: rgba(255,65,65,0.05);
+            letter-spacing: 1px;
+            vertical-align: middle;
+        }
+
+        .field { margin-bottom: 16px; }
+
+        label {
+            display: block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #3a5c3a;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            background: #060906;
+            border: 1px solid #1a3a1a;
+            border-bottom: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            padding: 10px 12px;
+            outline: none;
+            transition: all 0.2s;
+            resize: vertical;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: #00ff41;
+            box-shadow: 0 0 10px rgba(0,255,65,0.15);
+        }
+
+        input::placeholder, textarea::placeholder { color: #1a3a1a; }
+
+        .btn {
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 3px;
+            padding: 10px 24px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #00ff41;
+            color: #0a0e0a;
+            box-shadow: 0 0 16px rgba(0,255,65,0.3);
+        }
+
+        .comment-item {
+            padding: 14px 0;
+            border-bottom: 1px solid #0f1f0f;
+        }
+
+        .comment-item:last-child { border-bottom: none; }
+
+        .comment-user {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #00ff41;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        .comment-user::before { content: '> '; color: #3a5c3a; }
+
+        .comment-content {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 15px;
+            color: #7aad7a;
+            padding-left: 12px;
+            border-left: 2px solid #1a3a1a;
+        }
+
+        .empty-state {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: #1a3a1a;
+            text-align: center;
+            padding: 24px;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
 <body>
-    <h2>Home Page</h2>
+    <div class="topbar">
+        <div class="topbar-left">VULN<span>SPRING</span> // HOME</div>
+        <nav class="topbar-nav">
+            <a href="/upload">[ UPLOAD ]</a>
+            <a href="/admin">[ ADMIN ]</a>
+            <a href="/login" class="danger">[ LOGOUT ]</a>
+        </nav>
+    </div>
 
-    <form action="/comment" method="post">
-        <input type="text" name="username" placeholder="Username">
-        <br><br>
-        <textarea name="content" placeholder="Write a comment"></textarea>
-        <br><br>
-        <button type="submit">Post Comment</button>
-    </form>
+    <div class="container">
+        <div class="section-label">// post a comment</div>
+        <div class="card">
+            <div class="card-title">
+                NEW COMMENT
+                <span class="vuln-tag">VULN: XSS</span>
+            </div>
+            <form action="/comment" method="post">
+                <div class="field">
+                    <label>// USERNAME</label>
+                    <input type="text" name="username" placeholder="your username" autocomplete="off">
+                </div>
+                <div class="field">
+                    <label>// COMMENT</label>
+                    <textarea name="content" rows="3" placeholder="write something..."></textarea>
+                </div>
+                <button class="btn" type="submit">[ POST ]</button>
+            </form>
+        </div>
 
-    <hr>
-
-    <h3>Comments</h3>
-
-    <div th:each="comment : ${comments}">
-        <p>
-            <strong th:text="${comment.username}"></strong>:
-            <span th:utext="${comment.content}"></span>
-        </p>
+        <div class="section-label">// comment feed</div>
+        <div class="card">
+            <div class="card-title">STORED COMMENTS</div>
+            <div th:if="${#lists.isEmpty(comments)}" class="empty-state">// no comments yet</div>
+            <div th:each="comment : ${comments}" class="comment-item">
+                <div class="comment-user" th:text="${comment.username}"></div>
+                <div class="comment-content" th:text="${comment.content}"></div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
